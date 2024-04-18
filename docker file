@@ -1,0 +1,30 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    // Build Docker image
+                    docker.build('my-image:latest', '-f Dockerfile .')
+                }
+            }
+        }
+        stage('Test') {
+            steps {
+                // Run tests inside Docker container
+                sh 'docker run my-image:latest npm test'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                // Push Docker image to a registry
+                script {
+                    docker.withRegistry('https://docker.example.com', 'docker-credentials-id') {
+                        docker.image('my-image:latest').push('latest')
+                    }
+                }
+            }
+        }
+    }
+}
